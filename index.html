@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Math & Circuit Solver</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Circuit Solver</h1>
+
+        <label for="module-select">Select Solver:</label>
+        <select id="module-select">
+            <option value="opamp">Op-Amp Gain Calculator</option>
+            <option value="bjt">BJT DC Biasing (Voltage Divider)</option>
+        </select>
+
+        <!-- ================= OP-AMP SECTION ================= -->
+        <div id="opamp-section">
+            <label for="type">Circuit Type:</label>
+            <select id="type">
+                <option value="non-inverting">Non-Inverting Op-Amp</option>
+                <option value="inverting">Inverting Op-Amp</option>
+            </select>
+
+            <label for="vin">Input Voltage (Vin in Volts):</label>
+            <input type="number" id="vin" placeholder="e.g. 2">
+
+            <label for="rf">Feedback Resistance (Rf in Ohms):</label>
+            <input type="number" id="rf" placeholder="e.g. 10000">
+
+            <label for="rin">Input Resistance (Rin in Ohms):</label>
+            <input type="number" id="rin" placeholder="e.g. 2000">
+
+            <label for="vcc">+Vcc (Positive Supply Rail in Volts):</label>
+            <input type="number" id="vcc" placeholder="e.g. 15" value="15">
+
+            <label for="vee">-Vee (Negative Supply Rail in Volts):</label>
+            <input type="number" id="vee" placeholder="e.g. -15" value="-15">
+
+            <div class="result-box">
+                <h3>Results:</h3>
+                <p>Gain: <span id="gain-val">-</span></p>
+                <p>Output Voltage (Vout): <span id="vout-val">-</span></p>
+            </div>
+
+            <div style="margin-top: 22px; text-align: center;">
+                <h3 style="font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Waveform Visualizer</h3>
+                <canvas id="waveCanvas" width="320" height="180" style="background: #090d16; border-radius: 10px;"></canvas>
+                <div style="font-size: 0.8rem; margin-top: 10px; display: flex; justify-content: center; gap: 18px;">
+                    <span style="color: #38bdf8; font-weight: 600;">— Vin (Input)</span>
+                    <span style="color: #f43f5e; font-weight: 600;">— Vout (Output)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BJT SECTION ================= -->
+        <div id="bjt-section" style="display: none;">
+            <label for="bjt-vcc">Vcc (Supply Voltage in Volts):</label>
+            <input type="number" id="bjt-vcc" placeholder="e.g. 12" value="12">
+
+            <label for="bjt-r1">R1 Resistance (Ohms):</label>
+            <input type="number" id="bjt-r1" placeholder="e.g. 10000">
+
+            <label for="bjt-r2">R2 Resistance (Ohms):</label>
+            <input type="number" id="bjt-r2" placeholder="e.g. 2200">
+
+            <label for="bjt-rc">Rc Resistance (Collector in Ohms):</label>
+            <input type="number" id="bjt-rc" placeholder="e.g. 1000">
+
+            <label for="bjt-re">Re Resistance (Emitter in Ohms):</label>
+            <input type="number" id="bjt-re" placeholder="e.g. 470">
+
+            <label for="bjt-beta">Beta (&beta; / hFE):</label>
+            <input type="number" id="bjt-beta" placeholder="e.g. 100" value="100">
+
+            <div class="result-box">
+                <h3>Q-Point Results:</h3>
+                <p>Base Voltage (Vb): <span id="vb-val">-</span></p>
+                <p>Collector Current (Ic): <span id="ic-val">-</span></p>
+                <p>Collector-Emitter (Vce): <span id="vce-val">-</span></p>
+                <p>Region: <span id="region-val" style="font-weight: bold; color: #38bdf8;">-</span></p>
+            </div>
+        </div>
+
+        <!-- Common Buttons -->
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="calc-btn">Calculate</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
