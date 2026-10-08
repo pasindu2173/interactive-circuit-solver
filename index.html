@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Math & Circuit Solver</title>
+    <title>Interactive Electronics Lab & Circuit Analyzer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Circuit Solver</h1>
+        <h1>Circuit Solver & Visualizer</h1>
 
-        <label for="module-select">Select Solver:</label>
+        <label for="module-select">Select Module:</label>
         <select id="module-select">
             <option value="opamp">Op-Amp Gain Calculator</option>
             <option value="bjt">BJT DC Biasing (Voltage Divider)</option>
+            <option value="timer555">555 Timer (Astable Multivibrator)</option>
         </select>
 
         <!-- ================= OP-AMP SECTION ================= -->
@@ -81,6 +82,32 @@
                 <p>Collector Current (Ic): <span id="ic-val">-</span></p>
                 <p>Collector-Emitter (Vce): <span id="vce-val">-</span></p>
                 <p>Region: <span id="region-val" style="font-weight: bold; color: #38bdf8;">-</span></p>
+            </div>
+        </div>
+
+        <!-- ================= 555 TIMER SECTION ================= -->
+        <div id="timer555-section" style="display: none;">
+            <label for="t555-r1">Resistor R1 (Ohms):</label>
+            <input type="number" id="t555-r1" placeholder="e.g. 1000">
+
+            <label for="t555-r2">Resistor R2 (Ohms):</label>
+            <input type="number" id="t555-r2" placeholder="e.g. 10000">
+
+            <label for="t555-c">Capacitor C1 (&mu;F):</label>
+            <input type="number" id="t555-c" placeholder="e.g. 10">
+
+            <div class="result-box">
+                <h3>555 Output Results:</h3>
+                <p>Frequency (f): <span id="t555-freq">-</span></p>
+                <p>Period (T): <span id="t555-period">-</span></p>
+                <p>High Time (Thigh): <span id="t555-thigh">-</span></p>
+                <p>Low Time (Tlow): <span id="t555-tlow">-</span></p>
+                <p>Duty Cycle: <span id="t555-duty">-</span></p>
+            </div>
+
+            <div style="margin-top: 22px; text-align: center;">
+                <h3 style="font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Output Waveform (Square)</h3>
+                <canvas id="timerCanvas" width="320" height="150" style="background: #090d16; border-radius: 10px;"></canvas>
             </div>
         </div>
 
