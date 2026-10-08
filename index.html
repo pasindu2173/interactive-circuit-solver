@@ -15,6 +15,7 @@
             <option value="opamp">Op-Amp Gain Calculator</option>
             <option value="bjt">BJT DC Biasing (Voltage Divider)</option>
             <option value="timer555">555 Timer (Astable Multivibrator)</option>
+            <option value="filter">Active RC Filter & E24 Matcher</option>
         </select>
 
         <!-- ================= OP-AMP SECTION ================= -->
@@ -108,6 +109,22 @@
             <div style="margin-top: 22px; text-align: center;">
                 <h3 style="font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Output Waveform (Square)</h3>
                 <canvas id="timerCanvas" width="320" height="150" style="background: #090d16; border-radius: 10px;"></canvas>
+            </div>
+        </div>
+
+        <!-- ================= RC FILTER SECTION ================= -->
+        <div id="filter-section" style="display: none;">
+            <label for="filter-r">Resistance R (Ohms):</label>
+            <input type="number" id="filter-r" placeholder="e.g. 10000">
+
+            <label for="filter-c">Capacitance C (nF - Nanofarads):</label>
+            <input type="number" id="filter-c" placeholder="e.g. 10">
+
+            <div class="result-box">
+                <h3>Filter Analysis Results:</h3>
+                <p>Cut-off Frequency (fc): <span id="fc-val">-</span></p>
+                <p>Time Constant (&tau;): <span id="tau-val">-</span></p>
+                <p>Nearest E24 Standard R: <span id="e24-r-val" style="font-weight: bold; color: #38bdf8;">-</span></p>
             </div>
         </div>
 

@@ -1,10 +1,37 @@
-// Module Switch Logic
+// ==========================================
+// 1. MODULE SWITCHING LOGIC
+// ==========================================
 document.getElementById("module-select").addEventListener("change", function() {
     const selected = this.value;
     document.getElementById("opamp-section").style.display = (selected === "opamp") ? "block" : "none";
     document.getElementById("bjt-section").style.display = (selected === "bjt") ? "block" : "none";
     document.getElementById("timer555-section").style.display = (selected === "timer555") ? "block" : "none";
+    document.getElementById("filter-section").style.display = (selected === "filter") ? "block" : "none";
+
+    updateResults();
 });
+
+// ==========================================
+// 2. HELPER CALCULATIONS & E24 MATCHING
+// ==========================================
+const E24_BASE = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1];
+
+function getNearestE24(rValue) {
+    if (isNaN(rValue) || rValue <= 0) return "-";
+    let exponent = Math.floor(Math.log10(rValue));
+    let baseVal = rValue / Math.pow(10, exponent);
+
+    let closest = E24_BASE.reduce((prev, curr) => Math.abs(curr - baseVal) < Math.abs(prev - baseVal) ? curr : prev);
+    let finalRes = closest * Math.pow(10, exponent);
+
+    if (finalRes >= 1e6) return (finalRes / 1e6).toFixed(2) + " MΩ";
+    if (finalRes >= 1e3) return (finalRes / 1e3).toFixed(2) + " kΩ";
+    return finalRes.toFixed(1) + " Ω";
+}
+
+// ==========================================
+// 3. CORE CIRCUIT CALCULATION LOGIC
+// ==========================================
 
 // Op-Amp Calculation Logic
 function calculateOpAmp(type, Vin, Rf, Rin, Vcc, Vee) {
@@ -26,7 +53,7 @@ function calculateOpAmp(type, Vin, Rf, Rin, Vcc, Vee) {
     return { gain, Vcalc, Vout, isSaturated };
 }
 
-// BJT Calculation Logic
+// BJT DC Biasing Logic
 function calculateBJT(Vcc, R1, R2, Rc, Re, Beta) {
     const Vbe = 0.7;
     let Vb = Vcc * (R2 / (R1 + R2));
@@ -58,9 +85,9 @@ function calculateBJT(Vcc, R1, R2, Rc, Re, Beta) {
     return { Vb, Ic, Vce, region };
 }
 
-// 555 Timer Calculation Logic (Astable Multivibrator)
+// 555 Timer Astable Multivibrator Logic
 function calculate555(R1, R2, C_uF) {
-    let C = C_uF * 1e-6; // uF -> F
+    let C = C_uF * 1e-6; // Convert uF to Farads
     let Thigh = 0.693 * (R1 + R2) * C;
     let Tlow = 0.693 * R2 * C;
     let T = Thigh + Tlow;
@@ -70,7 +97,21 @@ function calculate555(R1, R2, C_uF) {
     return { freq, T, Thigh, Tlow, duty };
 }
 
-// Draw Op-Amp Sine Wave
+// RC Filter Calculation Logic
+function calculateFilter(R, C_nF) {
+    let C = C_nF * 1e-9; // Convert nF to Farads
+    let fc = 1 / (2 * Math.PI * R * C);
+    let tau = R * C;
+    let nearestE24 = getNearestE24(R);
+
+    return { fc, tau, nearestE24 };
+}
+
+// ==========================================
+// 4. CANVAS WAVEFORM DRAWING LOGIC
+// ==========================================
+
+// Draw Sine Wave for Op-Amp
 function drawWaveforms(Vin, VoutCalc, Vcc, Vee, isInverting) {
     const canvas = document.getElementById("waveCanvas");
     if (!canvas) return;
@@ -91,7 +132,7 @@ function drawWaveforms(Vin, VoutCalc, Vcc, Vee, isInverting) {
     const maxVal = Math.max(Math.abs(Vin), Math.abs(VoutCalc), Math.abs(Vcc), Math.abs(Vee), 1);
     const scale = (height / 2 - 20) / maxVal;
 
-    // Vin (Blue)
+    // Vin Waveform (Blue)
     ctx.strokeStyle = "#38bdf8";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -103,7 +144,7 @@ function drawWaveforms(Vin, VoutCalc, Vcc, Vee, isInverting) {
     }
     ctx.stroke();
 
-    // Vout (Red)
+    // Vout Waveform (Red)
     ctx.strokeStyle = "#f43f5e";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -118,7 +159,7 @@ function drawWaveforms(Vin, VoutCalc, Vcc, Vee, isInverting) {
     ctx.stroke();
 }
 
-// Draw 555 Timer Square Wave Dynamic Duty Cycle
+// Draw Square Wave for 555 Timer
 function drawSquareWave(dutyCycle) {
     const canvas = document.getElementById("timerCanvas");
     if (!canvas) return;
@@ -131,7 +172,7 @@ function drawSquareWave(dutyCycle) {
     const padding = 25;
     const highY = padding;
     const lowY = height - padding;
-    const cycleWidth = width / 3; // Render 3 full cycles
+    const cycleWidth = width / 3;
 
     const highWidth = cycleWidth * (dutyCycle / 100);
     const lowWidth = cycleWidth - highWidth;
@@ -144,12 +185,9 @@ function drawSquareWave(dutyCycle) {
     ctx.moveTo(currentX, lowY);
 
     for (let i = 0; i < 3; i++) {
-        // High Pulse
         ctx.lineTo(currentX, highY);
         currentX += highWidth;
         ctx.lineTo(currentX, highY);
-        
-        // Low Pulse
         ctx.lineTo(currentX, lowY);
         currentX += lowWidth;
         ctx.lineTo(currentX, lowY);
@@ -158,7 +196,9 @@ function drawSquareWave(dutyCycle) {
     ctx.stroke();
 }
 
-// Master Updater Function
+// ==========================================
+// 5. MASTER RESULTS UPDATER FUNCTION
+// ==========================================
 function updateResults() {
     const moduleType = document.getElementById("module-select").value;
 
@@ -202,7 +242,6 @@ function updateResults() {
 
         let res = calculate555(R1, R2, C);
 
-        // Display Frequency formatting (Hz vs kHz)
         if (res.freq >= 1000) {
             document.getElementById("t555-freq").innerText = (res.freq / 1000).toFixed(2) + " kHz";
         } else {
@@ -215,14 +254,37 @@ function updateResults() {
         document.getElementById("t555-duty").innerText = res.duty.toFixed(1) + " %";
 
         drawSquareWave(res.duty);
+
+    } else if (moduleType === "filter") {
+        let R = parseFloat(document.getElementById("filter-r").value);
+        let C = parseFloat(document.getElementById("filter-c").value);
+
+        if (isNaN(R) || isNaN(C) || R <= 0 || C <= 0) return false;
+
+        let res = calculateFilter(R, C);
+
+        if (res.fc >= 1e6) {
+            document.getElementById("fc-val").innerText = (res.fc / 1e6).toFixed(2) + " MHz";
+        } else if (res.fc >= 1e3) {
+            document.getElementById("fc-val").innerText = (res.fc / 1e3).toFixed(2) + " kHz";
+        } else {
+            document.getElementById("fc-val").innerText = res.fc.toFixed(2) + " Hz";
+        }
+
+        document.getElementById("tau-val").innerText = (res.tau * 1e6).toFixed(2) + " µs";
+        document.getElementById("e24-r-val").innerText = res.nearestE24;
     }
     return true;
 }
 
+// ==========================================
+// 6. EVENT LISTENERS SETUP
+// ==========================================
+
 // Calculate Button Event
 document.getElementById("calc-btn").addEventListener("click", function() {
     let ok = updateResults();
-    if (!ok) alert("කරුණාකර නිවැරදි අගයන් ඇතුළත් කරන්න.");
+    if (!ok) alert("Please enter valid numerical values for all required fields.");
 });
 
 // Reset Button Event
@@ -260,16 +322,27 @@ document.getElementById("reset-btn").addEventListener("click", function() {
         document.getElementById("t555-duty").innerText = "-";
         const canvas = document.getElementById("timerCanvas");
         if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    } else if (moduleType === "filter") {
+        document.getElementById("filter-r").value = "";
+        document.getElementById("filter-c").value = "";
+        document.getElementById("fc-val").innerText = "-";
+        document.getElementById("tau-val").innerText = "-";
+        document.getElementById("e24-r-val").innerText = "-";
     }
 });
 
-// Live Event Listeners
+// Live Event Listeners for Input Fields
 const allInputs = [
     "vin", "rf", "rin", "vcc", "vee", "type",
     "bjt-vcc", "bjt-r1", "bjt-r2", "bjt-rc", "bjt-re", "bjt-beta",
-    "t555-r1", "t555-r2", "t555-c"
+    "t555-r1", "t555-r2", "t555-c",
+    "filter-r", "filter-c"
 ];
+
 allInputs.forEach(id => {
     let el = document.getElementById(id);
-    if (el) el.addEventListener("input", updateResults);
+    if (el) {
+        el.addEventListener("input", updateResults);
+        el.addEventListener("change", updateResults);
+    }
 });
