@@ -60,5 +60,5 @@ An interactive, web-based circuit analysis and signal visualization suite design
 
 ## Author
 
-Developed by Pasindu  
-Computer Engineering Student at University of Sri Jayewardenepura
+Developed by Pasindu Milan
+Computer Engineering Undergraduate at University of Sri Jayewardenepura
